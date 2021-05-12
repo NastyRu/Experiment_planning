@@ -2,13 +2,11 @@ import dash
 from dash.dependencies import Input, Output, State
 import dash_html_components as html
 import dash_core_components as dcc
-from model import calculate_b, \
+from model import calculate_b, calculate_b_dfe, \
                   convert_factor_to_value, \
                   calculate_reley_param, \
                   calculate_gauss_params, \
-                  GenerateRequest, ReleyGenerator, \
-                  ProcessRequest, GaussGenerator, \
-                  Model, get_row
+                  get_row
 import dash_bootstrap_components as dbc
 import pandas as pd
 import modeller
@@ -97,10 +95,10 @@ app.layout = html.Div(id='main', children=[
     dbc.Row(
         [
             dbc.Col(children=html.H6("Минимум"), width={"size": 1}),
-            dbc.Col(children=dcc.Input(id='rel_min1', debounce=True, value=1, type='text'), width={"size": 2}),
-            dbc.Col(children=dcc.Input(id='rel_min2', debounce=True, value=1, type='text'), width={"size": 2}),
-            dbc.Col(children=dcc.Input(id='norm_min1', debounce=True, value=17, type='text'), width={"size": 2}),
-            dbc.Col(children=dcc.Input(id='norm_d_min1', debounce=True, value=5, type='text'), width={"size": 2}),
+            dbc.Col(children=dcc.Input(id='rel_min1', debounce=True, value=4, type='text'), width={"size": 2}),
+            dbc.Col(children=dcc.Input(id='rel_min2', debounce=True, value=4, type='text'), width={"size": 2}),
+            dbc.Col(children=dcc.Input(id='norm_min1', debounce=True, value=14, type='text'), width={"size": 2}),
+            dbc.Col(children=dcc.Input(id='norm_d_min1', debounce=True, value=2, type='text'), width={"size": 2}),
             dbc.Col(children=dcc.Input(id='clients', debounce=True, value=100, type='number'), width=2),
         ], style={"padding": "3px"}
     ),
@@ -110,7 +108,7 @@ app.layout = html.Div(id='main', children=[
             dbc.Col(children=dcc.Input(id='rel_max1', debounce=True, value=10, type='text'), width={"size": 2}),
             dbc.Col(children=dcc.Input(id='rel_max2', debounce=True, value=10, type='text'), width={"size": 2}),
             dbc.Col(children=dcc.Input(id='norm_max1', debounce=True, value=20, type='text'), width={"size": 2}),
-            dbc.Col(children=dcc.Input(id='norm_d_max1', debounce=True, value=10, type='text'), width={"size": 2})
+            dbc.Col(children=dcc.Input(id='norm_d_max1', debounce=True, value=7, type='text'), width={"size": 2})
         ], style={"padding": "3px"}
     ),
     dbc.Row(
@@ -122,15 +120,15 @@ app.layout = html.Div(id='main', children=[
     dbc.Row(
         [
             dbc.Col(children=html.H6("Минимум"), width={"size": 1}),
-            dbc.Col(children=dcc.Input(id='norm_min2', debounce=True, value=17, type='text'), width={"size": 2,  "offset": 4}),
-            dbc.Col(children=dcc.Input(id='norm_d_min2', debounce=True, value=5, type='text'), width={"size": 2}),
+            dbc.Col(children=dcc.Input(id='norm_min2', debounce=True, value=14, type='text'), width={"size": 2,  "offset": 4}),
+            dbc.Col(children=dcc.Input(id='norm_d_min2', debounce=True, value=2, type='text'), width={"size": 2}),
         ], style={"padding": "3px"}
     ),
     dbc.Row(
         [
             dbc.Col(children=html.H6("Максимум"), width=1),
             dbc.Col(children=dcc.Input(id='norm_max2', debounce=True, value=20, type='text'), width={"size": 2,  "offset": 4}),
-            dbc.Col(children=dcc.Input(id='norm_d_max2', debounce=True, value=10, type='text'), width={"size": 2}),
+            dbc.Col(children=dcc.Input(id='norm_d_max2', debounce=True, value=7, type='text'), width={"size": 2}),
             dbc.Col(children=html.Button('Построить', id='table', n_clicks=0))
         ], style={"padding": "3px"}
     ),
@@ -230,6 +228,8 @@ def graphic(table_clicks, add_clicks, clients_number, rel_min1, rel_max1,
     for i in range(experim1):
         array_x1[i] = array_x1[i][1:]
 
+    repeat = 30
+
     if (add_clicks > n_add):
         n_add = add_clicks
         x1_new = float(x1_new)
@@ -299,324 +299,324 @@ def graphic(table_clicks, add_clicks, clients_number, rel_min1, rel_max1,
         i += 1
 
     b0 = calculate_b(0, 1,
-                     [array_x[i][0] for i in range(count_experiments)],
-                     [array_x[i][64] for i in range(count_experiments)],
-                     count_experiments)
+                       [array_x[i][0] for i in range(count_experiments)],
+                       [array_x[i][64] for i in range(count_experiments)],
+                       count_experiments)
 
     b1 = calculate_b(f1_b, f1_e,
-                     [array_x[i][1] for i in range(count_experiments)],
-                     [array_x[i][64] for i in range(count_experiments)],
-                     count_experiments)
+                   [array_x[i][1] for i in range(count_experiments)],
+                   [array_x[i][64] for i in range(count_experiments)],
+                   count_experiments)
 
     b2 = calculate_b(f2_b, f2_e,
-                     [array_x[i][2] for i in range(count_experiments)],
-                     [array_x[i][64] for i in range(count_experiments)],
-                     count_experiments)
+                   [array_x[i][2] for i in range(count_experiments)],
+                   [array_x[i][64] for i in range(count_experiments)],
+                   count_experiments)
 
     b3 = calculate_b(f3_b, f3_e,
-                     [array_x[i][3] for i in range(count_experiments)],
-                     [array_x[i][64] for i in range(count_experiments)],
-                     count_experiments)
+                   [array_x[i][3] for i in range(count_experiments)],
+                   [array_x[i][64] for i in range(count_experiments)],
+                   count_experiments)
 
     b4 = calculate_b(f4_b, f4_e,
-                     [array_x[i][4] for i in range(count_experiments)],
-                     [array_x[i][64] for i in range(count_experiments)],
-                     count_experiments)
+                   [array_x[i][4] for i in range(count_experiments)],
+                   [array_x[i][64] for i in range(count_experiments)],
+                   count_experiments)
 
     b5 = calculate_b(f5_b, f5_e,
-                     [array_x[i][5] for i in range(count_experiments)],
-                     [array_x[i][64] for i in range(count_experiments)],
-                     count_experiments)
+                   [array_x[i][5] for i in range(count_experiments)],
+                   [array_x[i][64] for i in range(count_experiments)],
+                   count_experiments)
 
     b6 = calculate_b(f6_b, f6_e,
-                     [array_x[i][6] for i in range(count_experiments)],
+                   [array_x[i][6] for i in range(count_experiments)],
+                   [array_x[i][64] for i in range(count_experiments)],
+                   count_experiments)
+
+    b12 = calculate_b(f1_b * f2_b, f1_e * f2_e,
+                    [array_x[i][7] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b13 = calculate_b(f1_b * f3_b, f1_e * f3_e,
+                    [array_x[i][8] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b14 = calculate_b(f1_b * f4_b, f1_e * f4_e,
+                    [array_x[i][9] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b15 = calculate_b(f1_b * f5_b, f1_e * f5_e,
+                    [array_x[i][10] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b16 = calculate_b(f1_b * f6_b, f1_e * f6_e,
+                    [array_x[i][11] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b23 = calculate_b(f2_b * f3_b, f2_e * f3_e,
+                    [array_x[i][12] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b24 = calculate_b(f2_b * f4_b, f2_e * f4_e,
+                    [array_x[i][13] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b25 = calculate_b(f2_b * f5_b, f2_e * f5_e,
+                    [array_x[i][14] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b26 = calculate_b(f2_b * f6_b, f2_e * f6_e,
+                    [array_x[i][15] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b34 = calculate_b(f3_b * f4_b, f3_e * f4_e,
+                    [array_x[i][16] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b35 = calculate_b(f3_b * f5_b, f3_e * f5_e,
+                    [array_x[i][17] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b36 = calculate_b(f3_b * f6_b, f3_e * f6_e,
+                    [array_x[i][18] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b45 = calculate_b(f4_b * f5_b, f4_e * f5_e,
+                    [array_x[i][19] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b46 = calculate_b(f4_b * f6_b, f4_e * f6_e,
+                    [array_x[i][20] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b56 = calculate_b(f5_b * f6_b, f5_e * f6_e,
+                    [array_x[i][21] for i in range(count_experiments)],
+                    [array_x[i][64] for i in range(count_experiments)],
+                    count_experiments)
+
+    b123 = calculate_b(f1_b * f2_b * f3_b, f1_e * f2_e * f3_e,
+                     [array_x[i][22] for i in range(count_experiments)],
                      [array_x[i][64] for i in range(count_experiments)],
                      count_experiments)
 
-    b12 = calculate_b(f1_b * f2_b, f1_e * f2_e,
-                      [array_x[i][7] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b13 = calculate_b(f1_b * f3_b, f1_e * f3_e,
-                      [array_x[i][8] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b14 = calculate_b(f1_b * f4_b, f1_e * f4_e,
-                      [array_x[i][9] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b15 = calculate_b(f1_b * f5_b, f1_e * f5_e,
-                      [array_x[i][10] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b16 = calculate_b(f1_b * f6_b, f1_e * f6_e,
-                      [array_x[i][11] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b23 = calculate_b(f2_b * f3_b, f2_e * f3_e,
-                      [array_x[i][12] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b24 = calculate_b(f2_b * f4_b, f2_e * f4_e,
-                      [array_x[i][13] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b25 = calculate_b(f2_b * f5_b, f2_e * f5_e,
-                      [array_x[i][14] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b26 = calculate_b(f2_b * f6_b, f2_e * f6_e,
-                      [array_x[i][15] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b34 = calculate_b(f3_b * f4_b, f3_e * f4_e,
-                      [array_x[i][16] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b35 = calculate_b(f3_b * f5_b, f3_e * f5_e,
-                      [array_x[i][17] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b36 = calculate_b(f3_b * f6_b, f3_e * f6_e,
-                      [array_x[i][18] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b45 = calculate_b(f4_b * f5_b, f4_e * f5_e,
-                      [array_x[i][19] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b46 = calculate_b(f4_b * f6_b, f4_e * f6_e,
-                      [array_x[i][20] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b56 = calculate_b(f5_b * f6_b, f5_e * f6_e,
-                      [array_x[i][21] for i in range(count_experiments)],
-                      [array_x[i][64] for i in range(count_experiments)],
-                      count_experiments)
-
-    b123 = calculate_b(f1_b * f2_b * f3_b, f1_e * f2_e * f3_e,
-                       [array_x[i][22] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
-
     b124 = calculate_b(f1_b * f2_b * f4_b, f1_e * f2_e * f4_e,
-                       [array_x[i][23] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][23] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b125 = calculate_b(f1_b * f2_b * f5_b, f1_e * f2_e * f5_e,
-                       [array_x[i][24] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][24] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b126 = calculate_b(f1_b * f2_b * f6_b, f1_e * f2_e * f6_e,
-                       [array_x[i][25] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][25] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b134 = calculate_b(f1_b * f3_b * f4_b, f1_e * f3_e * f4_e,
-                       [array_x[i][26] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][26] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b135 = calculate_b(f1_b * f3_b * f5_b, f1_e * f3_e * f5_e,
-                       [array_x[i][27] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][27] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b136 = calculate_b(f1_b * f3_b * f6_b, f1_e * f3_e * f6_e,
-                       [array_x[i][28] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][28] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b145 = calculate_b(f1_b * f4_b * f5_b, f1_e * f4_e * f5_e,
-                       [array_x[i][29] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][29] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b146 = calculate_b(f1_b * f4_b * f6_b, f1_e * f4_e * f6_e,
-                       [array_x[i][30] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][30] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b156 = calculate_b(f1_b * f5_b * f6_b, f1_e * f5_e * f6_e,
-                       [array_x[i][31] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][31] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b234 = calculate_b(f2_b * f3_b * f4_b, f2_e * f3_e * f4_e,
-                       [array_x[i][32] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][32] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b235 = calculate_b(f2_b * f3_b * f5_b, f2_e * f3_e * f5_e,
-                       [array_x[i][33] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][33] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b236 = calculate_b(f2_b * f3_b * f6_b, f2_e * f3_e * f6_e,
-                       [array_x[i][34] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][34] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b245 = calculate_b(f2_b * f4_b * f5_b, f2_e * f4_e * f5_e,
-                       [array_x[i][35] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][35] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b246 = calculate_b(f2_b * f4_b * f6_b, f2_e * f4_e * f6_e,
-                       [array_x[i][36] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][36] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b256 = calculate_b(f2_b * f5_b * f6_b, f2_e * f5_e * f6_e,
-                       [array_x[i][37] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][37] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b345 = calculate_b(f3_b * f4_b * f5_b, f3_e * f4_e * f5_e,
-                       [array_x[i][38] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][38] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b346 = calculate_b(f3_b * f4_b * f6_b, f3_e * f4_e * f6_e,
-                       [array_x[i][39] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][39] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b356 = calculate_b(f3_b * f5_b * f6_b, f3_e * f5_e * f6_e,
-                       [array_x[i][40] for i in range(count_experiments)],
-                       [array_x[i][64] for i in range(count_experiments)],
-                       count_experiments)
+                     [array_x[i][40] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
 
     b456 = calculate_b(f4_b * f5_b * f6_b, f4_e * f5_e * f6_e,
-                       [array_x[i][41] for i in range(count_experiments)],
+                     [array_x[i][41] for i in range(count_experiments)],
+                     [array_x[i][64] for i in range(count_experiments)],
+                     count_experiments)
+
+    b1234 = calculate_b(f1_b * f2_b * f3_b * f4_b, f1_e * f2_e * f3_e * f4_e,
+                      [array_x[i][42] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b1235 = calculate_b(f1_b * f2_b * f3_b * f5_b, f1_e * f2_e * f3_e * f5_e,
+                      [array_x[i][43] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b1236 = calculate_b(f1_b * f2_b * f3_b * f6_b, f1_e * f2_e * f3_e * f6_e,
+                      [array_x[i][44] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b1245 = calculate_b(f1_b * f2_b * f4_b * f5_b, f1_e * f2_e * f4_e * f5_e,
+                      [array_x[i][45] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b1246 = calculate_b(f1_b * f2_b * f4_b * f6_b, f1_e * f2_e * f4_e * f6_e,
+                      [array_x[i][46] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b1256 = calculate_b(f1_b * f2_b * f5_b * f6_b, f1_e * f2_e * f5_e * f6_e,
+                      [array_x[i][47] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b1345 = calculate_b(f1_b * f3_b * f4_b * f5_b, f1_e * f3_e * f4_e * f5_e,
+                      [array_x[i][48] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b1346 = calculate_b(f1_b * f3_b * f4_b * f6_b, f1_e * f3_e * f4_e * f6_e,
+                      [array_x[i][49] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b1356 = calculate_b(f1_b * f3_b * f5_b * f6_b, f1_e * f3_e * f5_e * f6_e,
+                      [array_x[i][50] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b1456 = calculate_b(f1_b * f4_b * f5_b * f6_b, f1_e * f4_e * f5_e * f6_e,
+                      [array_x[i][51] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b2345 = calculate_b(f2_b * f3_b * f4_b * f5_b, f2_e * f3_e * f4_e * f5_e,
+                      [array_x[i][52] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b2346 = calculate_b(f2_b * f3_b * f4_b * f6_b, f2_e * f3_e * f4_e * f6_e,
+                      [array_x[i][53] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments) / repeat
+
+    b2356 = calculate_b(f2_b * f3_b * f5_b * f6_b, f2_e * f3_e * f5_e * f6_e,
+                      [array_x[i][54] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b2456 = calculate_b(f2_b * f4_b * f5_b * f6_b, f2_e * f4_e * f5_e * f6_e,
+                      [array_x[i][55] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b3456 = calculate_b(f3_b * f4_b * f5_b * f6_b, f3_e * f4_e * f5_e * f6_e,
+                      [array_x[i][56] for i in range(count_experiments)],
+                      [array_x[i][64] for i in range(count_experiments)],
+                      count_experiments)
+
+    b12345 = calculate_b(f1_b * f2_b * f3_b * f4_b * f5_b, f1_e * f2_e * f3_e * f4_e * f5_e,
+                       [array_x[i][57] for i in range(count_experiments)],
                        [array_x[i][64] for i in range(count_experiments)],
                        count_experiments)
 
-    b1234 = calculate_b(f1_b * f2_b * f3_b * f4_b, f1_e * f2_e * f3_e * f4_e,
-                        [array_x[i][42] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b1235 = calculate_b(f1_b * f2_b * f3_b * f5_b, f1_e * f2_e * f3_e * f5_e,
-                        [array_x[i][43] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b1236 = calculate_b(f1_b * f2_b * f3_b * f6_b, f1_e * f2_e * f3_e * f6_e,
-                        [array_x[i][44] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b1245 = calculate_b(f1_b * f2_b * f4_b * f5_b, f1_e * f2_e * f4_e * f5_e,
-                        [array_x[i][45] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b1246 = calculate_b(f1_b * f2_b * f4_b * f6_b, f1_e * f2_e * f4_e * f6_e,
-                        [array_x[i][46] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b1256 = calculate_b(f1_b * f2_b * f5_b * f6_b, f1_e * f2_e * f5_e * f6_e,
-                        [array_x[i][47] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b1345 = calculate_b(f1_b * f3_b * f4_b * f5_b, f1_e * f3_e * f4_e * f5_e,
-                        [array_x[i][48] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b1346 = calculate_b(f1_b * f3_b * f4_b * f6_b, f1_e * f3_e * f4_e * f6_e,
-                        [array_x[i][49] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b1356 = calculate_b(f1_b * f3_b * f5_b * f6_b, f1_e * f3_e * f5_e * f6_e,
-                        [array_x[i][50] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b1456 = calculate_b(f1_b * f4_b * f5_b * f6_b, f1_e * f4_e * f5_e * f6_e,
-                        [array_x[i][51] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b2345 = calculate_b(f2_b * f3_b * f4_b * f5_b, f2_e * f3_e * f4_e * f5_e,
-                        [array_x[i][52] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b2346 = calculate_b(f2_b * f3_b * f4_b * f6_b, f2_e * f3_e * f4_e * f6_e,
-                        [array_x[i][53] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b2356 = calculate_b(f2_b * f3_b * f5_b * f6_b, f2_e * f3_e * f5_e * f6_e,
-                        [array_x[i][54] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b2456 = calculate_b(f2_b * f4_b * f5_b * f6_b, f2_e * f4_e * f5_e * f6_e,
-                        [array_x[i][55] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b3456 = calculate_b(f3_b * f4_b * f5_b * f6_b, f3_e * f4_e * f5_e * f6_e,
-                        [array_x[i][56] for i in range(count_experiments)],
-                        [array_x[i][64] for i in range(count_experiments)],
-                        count_experiments)
-
-    b12345 = calculate_b(f1_b * f2_b * f3_b * f4_b * f5_b, f1_e * f2_e * f3_e * f4_e * f5_e,
-                         [array_x[i][57] for i in range(count_experiments)],
-                         [array_x[i][64] for i in range(count_experiments)],
-                         count_experiments)
-
     b12346 = calculate_b(f1_b * f2_b * f3_b * f4_b * f6_b, f1_e * f2_e * f3_e * f4_e * f6_e,
-                         [array_x[i][58] for i in range(count_experiments)],
-                         [array_x[i][64] for i in range(count_experiments)],
-                         count_experiments)
+                       [array_x[i][58] for i in range(count_experiments)],
+                       [array_x[i][64] for i in range(count_experiments)],
+                       count_experiments)
 
     b12356 = calculate_b(f1_b * f2_b * f3_b * f5_b * f6_b, f1_e * f2_e * f3_e * f5_e * f6_e,
-                         [array_x[i][59] for i in range(count_experiments)],
-                         [array_x[i][64] for i in range(count_experiments)],
-                         count_experiments)
+                       [array_x[i][59] for i in range(count_experiments)],
+                       [array_x[i][64] for i in range(count_experiments)],
+                       count_experiments)
 
     b12456 = calculate_b(f1_b * f2_b * f4_b * f5_b * f6_b, f1_e * f2_e * f4_e * f5_e * f6_e,
-                         [array_x[i][60] for i in range(count_experiments)],
-                         [array_x[i][64] for i in range(count_experiments)],
-                         count_experiments)
+                       [array_x[i][60] for i in range(count_experiments)],
+                       [array_x[i][64] for i in range(count_experiments)],
+                       count_experiments)
 
     b13456 = calculate_b(f1_b * f3_b * f4_b * f5_b * f6_b, f1_e * f3_e * f4_e * f5_e * f6_e,
-                         [array_x[i][61] for i in range(count_experiments)],
-                         [array_x[i][64] for i in range(count_experiments)],
-                         count_experiments)
+                       [array_x[i][61] for i in range(count_experiments)],
+                       [array_x[i][64] for i in range(count_experiments)],
+                       count_experiments)
 
     b23456 = calculate_b(f2_b * f3_b * f4_b * f5_b * f6_b, f2_e * f3_e * f4_e * f5_e * f6_e,
-                         [array_x[i][62] for i in range(count_experiments)],
-                         [array_x[i][64] for i in range(count_experiments)],
-                         count_experiments)
+                       [array_x[i][62] for i in range(count_experiments)],
+                       [array_x[i][64] for i in range(count_experiments)],
+                       count_experiments)
 
     b123456 = calculate_b(f1_b * f2_b * f3_b * f4_b * f5_b * f6_b, f1_e * f2_e * f3_e * f4_e * f5_e * f6_e,
-                          [array_x[i][63] for i in range(count_experiments)],
-                          [array_x[i][64] for i in range(count_experiments)],
-                          count_experiments)
+                        [array_x[i][63] for i in range(count_experiments)],
+                        [array_x[i][64] for i in range(count_experiments)],
+                        count_experiments)
 
     line = f"y={round(b0, 5)}+({round(b1, 5)})*x1+({round(b2, 5)})*x2+({round(b3, 5)})*x3+({round(b4, 5)})*x4+({round(b5, 5)})*x5+({round(b6, 5)})*x6"
 
@@ -698,322 +698,322 @@ def graphic(table_clicks, add_clicks, clients_number, rel_min1, rel_max1,
         array_x[i][68] = round(fabs(array_x[i][64] - array_x[i][66]), 5)
         i += 1
 
-    b0 = calculate_b(0, 1,
+    b0 = calculate_b_dfe(array_x1, 0, 1,
                    [array_x1[i][0] for i in range(new_count_experiments)],
                    [array_x1[i][64] for i in range(new_count_experiments)],
                    new_count_experiments)
 
-    b1 = calculate_b(f1_b, f1_e,
+    b1 = calculate_b_dfe(array_x1, f1_b, f1_e,
                    [array_x1[i][1] for i in range(new_count_experiments)],
                    [array_x1[i][64] for i in range(new_count_experiments)],
                    new_count_experiments)
 
-    b2 = calculate_b(f2_b, f2_e,
+    b2 = calculate_b_dfe(array_x1, f2_b, f2_e,
                    [array_x1[i][2] for i in range(new_count_experiments)],
                    [array_x1[i][64] for i in range(new_count_experiments)],
                    new_count_experiments)
 
-    b3 = calculate_b(f3_b, f3_e,
+    b3 = calculate_b_dfe(array_x1, f3_b, f3_e,
                    [array_x1[i][3] for i in range(new_count_experiments)],
                    [array_x1[i][64] for i in range(new_count_experiments)],
                    new_count_experiments)
 
-    b4 = calculate_b(f4_b, f4_e,
+    b4 = calculate_b_dfe(array_x1, f4_b, f4_e,
                    [array_x1[i][4] for i in range(new_count_experiments)],
                    [array_x1[i][64] for i in range(new_count_experiments)],
                    new_count_experiments)
 
-    b5 = calculate_b(f5_b, f5_e,
+    b5 = calculate_b_dfe(array_x1, f5_b, f5_e,
                    [array_x1[i][5] for i in range(new_count_experiments)],
                    [array_x1[i][64] for i in range(new_count_experiments)],
                    new_count_experiments)
 
-    b6 = calculate_b(f6_b, f6_e,
+    b6 = calculate_b_dfe(array_x1, f6_b, f6_e,
                    [array_x1[i][6] for i in range(new_count_experiments)],
                    [array_x1[i][64] for i in range(new_count_experiments)],
                    new_count_experiments)
 
-    b12 = calculate_b(f1_b * f2_b, f1_e * f2_e,
+    b12 = calculate_b_dfe(array_x1, f1_b * f2_b, f1_e * f2_e,
                     [array_x1[i][7] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b13 = calculate_b(f1_b * f3_b, f1_e * f3_e,
+    b13 = calculate_b_dfe(array_x1, f1_b * f3_b, f1_e * f3_e,
                     [array_x1[i][8] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b14 = calculate_b(f1_b * f4_b, f1_e * f4_e,
+    b14 = calculate_b_dfe(array_x1, f1_b * f4_b, f1_e * f4_e,
                     [array_x1[i][9] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b15 = calculate_b(f1_b * f5_b, f1_e * f5_e,
+    b15 = calculate_b_dfe(array_x1, f1_b * f5_b, f1_e * f5_e,
                     [array_x1[i][10] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b16 = calculate_b(f1_b * f6_b, f1_e * f6_e,
+    b16 = calculate_b_dfe(array_x1, f1_b * f6_b, f1_e * f6_e,
                     [array_x1[i][11] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b23 = calculate_b(f2_b * f3_b, f2_e * f3_e,
+    b23 = calculate_b_dfe(array_x1, f2_b * f3_b, f2_e * f3_e,
                     [array_x1[i][12] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b24 = calculate_b(f2_b * f4_b, f2_e * f4_e,
+    b24 = calculate_b_dfe(array_x1, f2_b * f4_b, f2_e * f4_e,
                     [array_x1[i][13] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b25 = calculate_b(f2_b * f5_b, f2_e * f5_e,
+    b25 = calculate_b_dfe(array_x1, f2_b * f5_b, f2_e * f5_e,
                     [array_x1[i][14] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b26 = calculate_b(f2_b * f6_b, f2_e * f6_e,
+    b26 = calculate_b_dfe(array_x1, f2_b * f6_b, f2_e * f6_e,
                     [array_x1[i][15] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b34 = calculate_b(f3_b * f4_b, f3_e * f4_e,
+    b34 = calculate_b_dfe(array_x1, f3_b * f4_b, f3_e * f4_e,
                     [array_x1[i][16] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b35 = calculate_b(f3_b * f5_b, f3_e * f5_e,
+    b35 = calculate_b_dfe(array_x1, f3_b * f5_b, f3_e * f5_e,
                     [array_x1[i][17] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b36 = calculate_b(f3_b * f6_b, f3_e * f6_e,
+    b36 = calculate_b_dfe(array_x1, f3_b * f6_b, f3_e * f6_e,
                     [array_x1[i][18] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b45 = calculate_b(f4_b * f5_b, f4_e * f5_e,
+    b45 = calculate_b_dfe(array_x1, f4_b * f5_b, f4_e * f5_e,
                     [array_x1[i][19] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b46 = calculate_b(f4_b * f6_b, f4_e * f6_e,
+    b46 = calculate_b_dfe(array_x1, f4_b * f6_b, f4_e * f6_e,
                     [array_x1[i][20] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b56 = calculate_b(f5_b * f6_b, f5_e * f6_e,
+    b56 = calculate_b_dfe(array_x1, f5_b * f6_b, f5_e * f6_e,
                     [array_x1[i][21] for i in range(new_count_experiments)],
                     [array_x1[i][64] for i in range(new_count_experiments)],
                     new_count_experiments)
 
-    b123 = calculate_b(f1_b * f2_b * f3_b, f1_e * f2_e * f3_e,
+    b123 = calculate_b_dfe(array_x1, f1_b * f2_b * f3_b, f1_e * f2_e * f3_e,
                      [array_x1[i][22] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b124 = calculate_b(f1_b * f2_b * f4_b, f1_e * f2_e * f4_e,
+    b124 = calculate_b_dfe(array_x1, f1_b * f2_b * f4_b, f1_e * f2_e * f4_e,
                      [array_x1[i][23] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b125 = calculate_b(f1_b * f2_b * f5_b, f1_e * f2_e * f5_e,
+    b125 = calculate_b_dfe(array_x1, f1_b * f2_b * f5_b, f1_e * f2_e * f5_e,
                      [array_x1[i][24] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b126 = calculate_b(f1_b * f2_b * f6_b, f1_e * f2_e * f6_e,
+    b126 = calculate_b_dfe(array_x1, f1_b * f2_b * f6_b, f1_e * f2_e * f6_e,
                      [array_x1[i][25] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b134 = calculate_b(f1_b * f3_b * f4_b, f1_e * f3_e * f4_e,
+    b134 = calculate_b_dfe(array_x1, f1_b * f3_b * f4_b, f1_e * f3_e * f4_e,
                      [array_x1[i][26] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b135 = calculate_b(f1_b * f3_b * f5_b, f1_e * f3_e * f5_e,
+    b135 = calculate_b_dfe(array_x1, f1_b * f3_b * f5_b, f1_e * f3_e * f5_e,
                      [array_x1[i][27] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b136 = calculate_b(f1_b * f3_b * f6_b, f1_e * f3_e * f6_e,
+    b136 = calculate_b_dfe(array_x1, f1_b * f3_b * f6_b, f1_e * f3_e * f6_e,
                      [array_x1[i][28] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b145 = calculate_b(f1_b * f4_b * f5_b, f1_e * f4_e * f5_e,
+    b145 = calculate_b_dfe(array_x1, f1_b * f4_b * f5_b, f1_e * f4_e * f5_e,
                      [array_x1[i][29] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b146 = calculate_b(f1_b * f4_b * f6_b, f1_e * f4_e * f6_e,
+    b146 = calculate_b_dfe(array_x1, f1_b * f4_b * f6_b, f1_e * f4_e * f6_e,
                      [array_x1[i][30] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b156 = calculate_b(f1_b * f5_b * f6_b, f1_e * f5_e * f6_e,
+    b156 = calculate_b_dfe(array_x1, f1_b * f5_b * f6_b, f1_e * f5_e * f6_e,
                      [array_x1[i][31] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b234 = calculate_b(f2_b * f3_b * f4_b, f2_e * f3_e * f4_e,
+    b234 = calculate_b_dfe(array_x1, f2_b * f3_b * f4_b, f2_e * f3_e * f4_e,
                      [array_x1[i][32] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b235 = calculate_b(f2_b * f3_b * f5_b, f2_e * f3_e * f5_e,
+    b235 = calculate_b_dfe(array_x1, f2_b * f3_b * f5_b, f2_e * f3_e * f5_e,
                      [array_x1[i][33] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b236 = calculate_b(f2_b * f3_b * f6_b, f2_e * f3_e * f6_e,
+    b236 = calculate_b_dfe(array_x1, f2_b * f3_b * f6_b, f2_e * f3_e * f6_e,
                      [array_x1[i][34] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b245 = calculate_b(f2_b * f4_b * f5_b, f2_e * f4_e * f5_e,
+    b245 = calculate_b_dfe(array_x1, f2_b * f4_b * f5_b, f2_e * f4_e * f5_e,
                      [array_x1[i][35] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b246 = calculate_b(f2_b * f4_b * f6_b, f2_e * f4_e * f6_e,
+    b246 = calculate_b_dfe(array_x1, f2_b * f4_b * f6_b, f2_e * f4_e * f6_e,
                      [array_x1[i][36] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b256 = calculate_b(f2_b * f5_b * f6_b, f2_e * f5_e * f6_e,
+    b256 = calculate_b_dfe(array_x1, f2_b * f5_b * f6_b, f2_e * f5_e * f6_e,
                      [array_x1[i][37] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b345 = calculate_b(f3_b * f4_b * f5_b, f3_e * f4_e * f5_e,
+    b345 = calculate_b_dfe(array_x1, f3_b * f4_b * f5_b, f3_e * f4_e * f5_e,
                      [array_x1[i][38] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b346 = calculate_b(f3_b * f4_b * f6_b, f3_e * f4_e * f6_e,
+    b346 = calculate_b_dfe(array_x1, f3_b * f4_b * f6_b, f3_e * f4_e * f6_e,
                      [array_x1[i][39] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b356 = calculate_b(f3_b * f5_b * f6_b, f3_e * f5_e * f6_e,
+    b356 = calculate_b_dfe(array_x1, f3_b * f5_b * f6_b, f3_e * f5_e * f6_e,
                      [array_x1[i][40] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b456 = calculate_b(f4_b * f5_b * f6_b, f4_e * f5_e * f6_e,
+    b456 = calculate_b_dfe(array_x1, f4_b * f5_b * f6_b, f4_e * f5_e * f6_e,
                      [array_x1[i][41] for i in range(new_count_experiments)],
                      [array_x1[i][64] for i in range(new_count_experiments)],
                      new_count_experiments)
 
-    b1234 = calculate_b(f1_b * f2_b * f3_b * f4_b, f1_e * f2_e * f3_e * f4_e,
+    b1234 = calculate_b_dfe(array_x1, f1_b * f2_b * f3_b * f4_b, f1_e * f2_e * f3_e * f4_e,
                       [array_x1[i][42] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b1235 = calculate_b(f1_b * f2_b * f3_b * f5_b, f1_e * f2_e * f3_e * f5_e,
+    b1235 = calculate_b_dfe(array_x1, f1_b * f2_b * f3_b * f5_b, f1_e * f2_e * f3_e * f5_e,
                       [array_x1[i][43] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b1236 = calculate_b(f1_b * f2_b * f3_b * f6_b, f1_e * f2_e * f3_e * f6_e,
+    b1236 = calculate_b_dfe(array_x1, f1_b * f2_b * f3_b * f6_b, f1_e * f2_e * f3_e * f6_e,
                       [array_x1[i][44] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b1245 = calculate_b(f1_b * f2_b * f4_b * f5_b, f1_e * f2_e * f4_e * f5_e,
+    b1245 = calculate_b_dfe(array_x1, f1_b * f2_b * f4_b * f5_b, f1_e * f2_e * f4_e * f5_e,
                       [array_x1[i][45] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b1246 = calculate_b(f1_b * f2_b * f4_b * f6_b, f1_e * f2_e * f4_e * f6_e,
+    b1246 = calculate_b_dfe(array_x1, f1_b * f2_b * f4_b * f6_b, f1_e * f2_e * f4_e * f6_e,
                       [array_x1[i][46] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b1256 = calculate_b(f1_b * f2_b * f5_b * f6_b, f1_e * f2_e * f5_e * f6_e,
+    b1256 = calculate_b_dfe(array_x1, f1_b * f2_b * f5_b * f6_b, f1_e * f2_e * f5_e * f6_e,
                       [array_x1[i][47] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b1345 = calculate_b(f1_b * f3_b * f4_b * f5_b, f1_e * f3_e * f4_e * f5_e,
+    b1345 = calculate_b_dfe(array_x1, f1_b * f3_b * f4_b * f5_b, f1_e * f3_e * f4_e * f5_e,
                       [array_x1[i][48] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b1346 = calculate_b(f1_b * f3_b * f4_b * f6_b, f1_e * f3_e * f4_e * f6_e,
+    b1346 = calculate_b_dfe(array_x1, f1_b * f3_b * f4_b * f6_b, f1_e * f3_e * f4_e * f6_e,
                       [array_x1[i][49] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b1356 = calculate_b(f1_b * f3_b * f5_b * f6_b, f1_e * f3_e * f5_e * f6_e,
+    b1356 = calculate_b_dfe(array_x1, f1_b * f3_b * f5_b * f6_b, f1_e * f3_e * f5_e * f6_e,
                       [array_x1[i][50] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b1456 = calculate_b(f1_b * f4_b * f5_b * f6_b, f1_e * f4_e * f5_e * f6_e,
+    b1456 = calculate_b_dfe(array_x1, f1_b * f4_b * f5_b * f6_b, f1_e * f4_e * f5_e * f6_e,
                       [array_x1[i][51] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b2345 = calculate_b(f2_b * f3_b * f4_b * f5_b, f2_e * f3_e * f4_e * f5_e,
+    b2345 = calculate_b_dfe(array_x1, f2_b * f3_b * f4_b * f5_b, f2_e * f3_e * f4_e * f5_e,
                       [array_x1[i][52] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b2346 = calculate_b(f2_b * f3_b * f4_b * f6_b, f2_e * f3_e * f4_e * f6_e,
+    b2346 = calculate_b_dfe(array_x1, f2_b * f3_b * f4_b * f6_b, f2_e * f3_e * f4_e * f6_e,
                       [array_x1[i][53] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b2356 = calculate_b(f2_b * f3_b * f5_b * f6_b, f2_e * f3_e * f5_e * f6_e,
+    b2356 = calculate_b_dfe(array_x1, f2_b * f3_b * f5_b * f6_b, f2_e * f3_e * f5_e * f6_e,
                       [array_x1[i][54] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b2456 = calculate_b(f2_b * f4_b * f5_b * f6_b, f2_e * f4_e * f5_e * f6_e,
+    b2456 = calculate_b_dfe(array_x1, f2_b * f4_b * f5_b * f6_b, f2_e * f4_e * f5_e * f6_e,
                       [array_x1[i][55] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b3456 = calculate_b(f3_b * f4_b * f5_b * f6_b, f3_e * f4_e * f5_e * f6_e,
+    b3456 = calculate_b_dfe(array_x1, f3_b * f4_b * f5_b * f6_b, f3_e * f4_e * f5_e * f6_e,
                       [array_x1[i][56] for i in range(new_count_experiments)],
                       [array_x1[i][64] for i in range(new_count_experiments)],
                       new_count_experiments)
 
-    b12345 = calculate_b(f1_b * f2_b * f3_b * f4_b * f5_b, f1_e * f2_e * f3_e * f4_e * f5_e,
+    b12345 = calculate_b_dfe(array_x1, f1_b * f2_b * f3_b * f4_b * f5_b, f1_e * f2_e * f3_e * f4_e * f5_e,
                        [array_x1[i][57] for i in range(new_count_experiments)],
                        [array_x1[i][64] for i in range(new_count_experiments)],
                        new_count_experiments)
 
-    b12346 = calculate_b(f1_b * f2_b * f3_b * f4_b * f6_b, f1_e * f2_e * f3_e * f4_e * f6_e,
+    b12346 = calculate_b_dfe(array_x1, f1_b * f2_b * f3_b * f4_b * f6_b, f1_e * f2_e * f3_e * f4_e * f6_e,
                        [array_x1[i][58] for i in range(new_count_experiments)],
                        [array_x1[i][64] for i in range(new_count_experiments)],
                        new_count_experiments)
 
-    b12356 = calculate_b(f1_b * f2_b * f3_b * f5_b * f6_b, f1_e * f2_e * f3_e * f5_e * f6_e,
+    b12356 = calculate_b_dfe(array_x1, f1_b * f2_b * f3_b * f5_b * f6_b, f1_e * f2_e * f3_e * f5_e * f6_e,
                        [array_x1[i][59] for i in range(new_count_experiments)],
                        [array_x1[i][64] for i in range(new_count_experiments)],
                        new_count_experiments)
 
-    b12456 = calculate_b(f1_b * f2_b * f4_b * f5_b * f6_b, f1_e * f2_e * f4_e * f5_e * f6_e,
+    b12456 = calculate_b_dfe(array_x1, f1_b * f2_b * f4_b * f5_b * f6_b, f1_e * f2_e * f4_e * f5_e * f6_e,
                        [array_x1[i][60] for i in range(new_count_experiments)],
                        [array_x1[i][64] for i in range(new_count_experiments)],
                        new_count_experiments)
 
-    b13456 = calculate_b(f1_b * f3_b * f4_b * f5_b * f6_b, f1_e * f3_e * f4_e * f5_e * f6_e,
+    b13456 = calculate_b_dfe(array_x1, f1_b * f3_b * f4_b * f5_b * f6_b, f1_e * f3_e * f4_e * f5_e * f6_e,
                        [array_x1[i][61] for i in range(new_count_experiments)],
                        [array_x1[i][64] for i in range(new_count_experiments)],
                        new_count_experiments)
 
-    b23456 = calculate_b(f2_b * f3_b * f4_b * f5_b * f6_b, f2_e * f3_e * f4_e * f5_e * f6_e,
+    b23456 = calculate_b_dfe(array_x1, f2_b * f3_b * f4_b * f5_b * f6_b, f2_e * f3_e * f4_e * f5_e * f6_e,
                        [array_x1[i][62] for i in range(new_count_experiments)],
                        [array_x1[i][64] for i in range(new_count_experiments)],
                        new_count_experiments)
 
-    b123456 = calculate_b(f1_b * f2_b * f3_b * f4_b * f5_b * f6_b, f1_e * f2_e * f3_e * f4_e * f5_e * f6_e,
+    b123456 = calculate_b_dfe(array_x1, f1_b * f2_b * f3_b * f4_b * f5_b * f6_b, f1_e * f2_e * f3_e * f4_e * f5_e * f6_e,
                         [array_x1[i][63] for i in range(new_count_experiments)],
                         [array_x1[i][64] for i in range(new_count_experiments)],
                         new_count_experiments)

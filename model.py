@@ -145,11 +145,31 @@ def convert_value_to_factor(min, max, value):
 
 def calculate_b(min, max, values, y, count_experiments):
     b = 0
+
     for i in range(count_experiments):
-        #b += convert_value_to_factor(min, max, convert_factor_to_value(min, max, values[i])) * y[i]
         b += values[i] * y[i]
     b /= count_experiments
     return b
+
+
+def calculate_b_dfe(array_x, min, max, values, y, count_experiments):
+    b = 0
+    repeats = 0
+    for i in range(1, len(array_x[0])):
+        k = 0
+        for j in range(len(array_x)):
+            if (array_x[j][i] == values[j]):
+                k += 1
+        if (k == len(array_x)):
+            repeats += 1
+
+    if repeats == 0:
+        repeats = 1
+
+    for i in range(count_experiments):
+        b += values[i] * y[i]
+    b /= count_experiments
+    return b / repeats
 
 
 def calculate_b_ockp(min, max, values, y, count_experiments):
