@@ -116,7 +116,7 @@ def count_load(clients_number, i1, di1, i2):
     model = Model([generator], [processor])
     result = model.event_mode()
 
-    return [intensivity_gen / intensivity_proc, result // 1000]
+    return [intensivity_gen / intensivity_proc, result]
 
 
 if __name__ == '__main__':
