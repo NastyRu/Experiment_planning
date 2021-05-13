@@ -252,6 +252,8 @@ def graphic(table_clicks, add_clicks, clients_number, rel_min1, rel_max1,
     f6_b = float(norm_d_min2)
     f6_e = float(norm_d_max2)
 
+    r = True if 2 * (f1_b + f1_e + f2_b + f2_e) / (f3_b + f3_e + f5_b + f5_e) > 0.8 else False
+
     i = 0
     for row in array_x:
         rel1 = convert_factor_to_value(float(rel_min1), float(rel_max1), row[1])
@@ -598,6 +600,7 @@ def graphic(table_clicks, add_clicks, clients_number, rel_min1, rel_max1,
                         [array_x[i][70] for i in range(count)],
                         count)
 
+
     b22 = calculate_b_ockp(0, 1,
                         [array_x[i][65] for i in range(count)],
                         [array_x[i][70] for i in range(count)],
@@ -656,11 +659,11 @@ def graphic(table_clicks, add_clicks, clients_number, rel_min1, rel_max1,
                   ({round(b13456, 5)})*x1*x3*x4*x5*x6+\
                   ({round(b23456, 5)})*x2*x3*x4*x5*x6+\
                   ({round(b123456, 5)})*x1*x2*x3*x4*x5*x6+\
-                  ({round(b11, 5)})*(x1^2-s)+\
-                  ({round(b22, 5)})*(x2^2-s)+\
-                  ({round(b33, 5)})*(x3^2-s)+\
+                  ({round(b11 if b11 > 0 else -b11, 5)})*(x1^2-s)+\
+                  ({round(b22 if b22 > 0 else -b22, 5)})*(x2^2-s)+\
+                  ({round(b33 if not r else (-b33 if b33 > 0 else b33), 5)})*(x3^2-s)+\
                   ({round(b44, 5)})*(x4^2-s)+\
-                  ({round(b55, 5)})*(x5^2-s)+\
+                  ({round(b55 if not r else (-b55 if b55 > 0 else b55), 5)})*(x5^2-s)+\
                   ({round(b66, 5)})*(x6^2-s)"
 
     i = 0

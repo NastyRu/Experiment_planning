@@ -175,7 +175,6 @@ def calculate_b_dfe(array_x, min, max, values, y, count_experiments):
 def calculate_b_ockp(min, max, values, y, count_experiments):
     b = 0
     for i in range(count_experiments):
-        #b += convert_value_to_factor(min, max, convert_factor_to_value(min, max, values[i])) * y[i]
         b += values[i] * y[i]
 
     x = 0
